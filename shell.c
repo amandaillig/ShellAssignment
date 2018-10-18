@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/types.h> /* for pid_t */
+#include <sys/wait.h> /* for wait */
 
 struct Commands {
     char programName[20];
@@ -39,6 +41,17 @@ struct Commands createStruct(char* input) {
     return cmdTemp;
 }
 
+void* executeProgram(struct Commands cmd) {
+    pid_t pid=fork();
+    if (pid==0) { /* child process */
+        execv(cmd.programName,NULL);
+        exit(127); /* only if execv fails */
+    }
+    else { /* pid!=0; parent process */
+        waitpid(pid,0,0); /* wait for child to exit */
+    }
+}
+
 int main(int argc, char * argv[])
 {
     struct Commands arr_commands[5];
@@ -58,6 +71,7 @@ int main(int argc, char * argv[])
             //strcpy(inputTokenString, input);
 
             struct Commands cmd = createStruct(input);
+            executeProgram(cmd);
             //TODO: Add struct to array
             printf("Finished");
 		}
