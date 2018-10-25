@@ -21,7 +21,39 @@ void* getCommand(char* input)
 {
 	printf("Type command you would like to execute:\n ");
     fgets(input,20,stdin);
-} 
+}
+
+void* forkProcess(struct process processTable[PROCESS_TABLE_SIZE]) {
+    //Fork and get process ID
+    pid_t pid = fork();
+
+    //If -1, somethings wrong
+    if(pid == -1) {
+        printf("Error on forking\n");
+    }
+        //If id is not 0, we are the parent
+    else if(pid > 0) {
+        int status;
+        waitpid(pid, &status,  0);
+        printf("This is the parent\n");
+        printf("Process ID: %d\n", getpid());
+    }  //if it is 0, we are the child
+    else {
+        pid_t processID = getpid();
+        pid_t parentID = getppid();
+
+        struct process currentProcess;
+
+        currentProcess.process_id = processID;
+        currentProcess.parent_id = parentID;
+
+        processTable[0] = currentProcess;
+
+        printf("This is the child\n");
+        printf("Process ID: %d\n", processID);
+        printf("Finished printing id\n");
+    }
+}
 
 int main(int argc, char * argv[])
 {
@@ -33,37 +65,16 @@ int main(int argc, char * argv[])
 		getCommand(input);
 		printf("%s\n", input);
 
+		//If User typed in 'jobs', show job table
 		if(strcmp(input, jobsCommand) == 0) {
             //showJobs(processTable);
             printf("Show Jobbios");
 		} else {
             //TODO: Tokenize string, create a struct and add to command array, fork()
-            pid_t pid = fork();
+            // Passing reference to process table so we modify the right thing
+            forkProcess(&processTable);
 
-            if(pid == -1) {
-                printf("Error on forking\n");
-            } else if(pid > 0) {
-                int status;
-                waitpid(pid, &status,  0);
-                printf("This is the parent\n");
-                printf("Process ID: %d\n", getpid());
-            } else {
-                pid_t processID = getpid();
-                pid_t parentID = getppid();
-
-                struct process currentProcess;
-
-                currentProcess.process_id = processID;
-                currentProcess.parent_id = parentID;
-
-                processTable[0] = currentProcess;
-
-                printf("This is the child\n");
-                printf("Process ID: %d\n", processID);
-                printf("Finished printing id\n");
-            }
-
-            //printf("%d\n", processTable[0].currentProcess.process_id);
+            printf("%d\n", processTable[0].process_id);
 
             printf("Finished");
 		}
