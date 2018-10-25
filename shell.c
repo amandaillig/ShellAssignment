@@ -5,10 +5,16 @@
 #include <sys/types.h> /* for pid_t */
 #include <sys/wait.h> /* for wait */
 
-struct Commands {
+#define PROCESS_TABLE_SIZE 5
+
+struct process {
     char programName[20];
-    char pid[20]; //Should this be int?  I'm too lazy rn to care
-    //Boolean for if & is included or not?
+    int process_id;
+    int parent_id;
+};
+
+struct processTableEntry {
+    struct process currentProcess;
 };
 
 void* getCommand(char* input)
@@ -17,13 +23,62 @@ void* getCommand(char* input)
     fgets(input,20,stdin);
 } 
 
+int main(int argc, char * argv[])
+{
+    struct process processTable[PROCESS_TABLE_SIZE];
+	//while(1)
+	//
+		const char* input[20];
+		char* jobsCommand = "jobs";
+		getCommand(input);
+		printf("%s\n", input);
+
+		if(strcmp(input, jobsCommand) == 0) {
+            //showJobs(processTable);
+            printf("Show Jobbios");
+		} else {
+            //TODO: Tokenize string, create a struct and add to command array, fork()
+            pid_t pid = fork();
+
+            if(pid == -1) {
+                printf("Error on forking\n");
+            } else if(pid > 0) {
+                int status;
+                waitpid(pid, &status,  0);
+                printf("This is the parent\n");
+                printf("Process ID: %d\n", getpid());
+            } else {
+                pid_t processID = getpid();
+                pid_t parentID = getppid();
+
+                struct process currentProcess;
+
+                currentProcess.process_id = processID;
+                currentProcess.parent_id = parentID;
+
+                processTable[0] = currentProcess;
+
+                printf("This is the child\n");
+                printf("Process ID: %d\n", processID);
+                printf("Finished printing id\n");
+            }
+
+            //printf("%d\n", processTable[0].currentProcess.process_id);
+
+            printf("Finished");
+		}
+	//}
+
+
+    /*
 void* showJobs(struct Commands cmdArray[]) {
     printf("Here are the jobs being run:\n");
     //Check if array is empty, if not cycle through array and print out necessary information
 }
 
-struct Commands createStruct(char* input) {
-    struct Commands cmdTemp;
+struct processTableEntry createStruct(char* input) {
+    struct processTableEntry processTable[5];
+
     char *token;
     token = strtok(input, " ");
     while(token != NULL) {
@@ -43,38 +98,13 @@ struct Commands createStruct(char* input) {
 
 void* executeProgram(struct Commands cmd) {
     pid_t pid=fork();
-    if (pid==0) { /* child process */
+    if (pid==0) {
         execv(cmd.programName,NULL);
-        exit(127); /* only if execv fails */
+        exit(127);
     }
-    else { /* pid!=0; parent process */
-        waitpid(pid,0,0); /* wait for child to exit */
+    else {
+        waitpid(pid,0,0);
     }
 }
-
-int main(int argc, char * argv[])
-{
-    struct Commands arr_commands[5];
-	//while(1)
-	//
-		const char* input[20];
-		char* jobsCommand = "jobs";
-		getCommand(input);
-		printf("%s\n", input);
-
-		if(strcmp(input, jobsCommand) == 0) {
-            showJobs(arr_commands);
-		} else {
-            //TODO: Tokenize string, create a struct and add to command array, fork()
-
-            //char inputTokenString[20];
-            //strcpy(inputTokenString, input);
-
-            struct Commands cmd = createStruct(input);
-            executeProgram(cmd);
-            //TODO: Add struct to array
-            printf("Finished");
-		}
-	//}
-
+*/
 }
