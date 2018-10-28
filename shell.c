@@ -15,15 +15,10 @@ typedef struct process {
 
 struct process* processTable[PROCESS_TABLE_SIZE] = {0};
 
-
-
 void* runProcess(void * programName) {
-
-    char* fileName = (char*)programName;
-
     // Replace process with execve system call
-    if(execve(fileName, NULL, NULL) == -1) {
-        printf("There was an error processing your request");
+    if(execve((char*)programName, NULL, NULL) == -1) {
+        printf("There was an error processing your request.  Wrong file name?\n");
     }
 }
 
@@ -38,26 +33,40 @@ int findNextEmptyIndex() {
 
 int main(int argc, char * argv[])
 {
-	//while(1) {
+    int stopLoop = 1;
+	while(stopLoop) {
 
 		char *input[20];
-		char *jobsCommand = "jobs";
+		char *jobsCommand = "jobs\n";
 
-		// Read Input
+
+		// ** READ USER INPUT **
         printf("Type command you would like to execute:\n");
         fgets(input,20,stdin);
 
-		//If User typed in 'jobs', show job table
-		if(strcmp(input, jobsCommand) == 0) {
+        // ** QUIT COMMAND **
+
+        if((strcmp(input, "quit") == 0) || strcmp(input, "q")) {
+            stopLoop = 0;
+        }
+		// ** SHOW JOBS **
+
+		else if(strcmp(input, jobsCommand) == 0) {
             //showJobs(processTable);
-            printf("Show Jobbios");
-		} else {
-            // Tokenize String so we know if there is an & or not
+            printf("Show Jobbios\n");
+		}
+
+		// ** START EXECUTING COMMAND **
+
+		else {
+
+            // ** TOKENIZING STRING **
+
             char *token;
             int bg = 0;
             char *programName[20];
 
-            token = strtok(token, " ");
+            token = strtok(input, " ");
             while(token != NULL) {
                 if(strcmp(token, "&\n") == 0) {
                     bg = 1;
@@ -67,118 +76,72 @@ int main(int argc, char * argv[])
                 token = strtok(NULL, " ");
             }
 
-            //Fork and get process ID
-            pid_t pid = fork();
+            // ** FORKING **
 
-            //If less than 0, somethings wrong
-            if(pid < 0) {
-                printf("Error on forking\n");
-            }
-            //If id is not 0, we are the parent
-            else if(pid > 0) {
-                struct process childProcess;
+            // Check if our process table is already full
+            int index;
+            index = findNextEmptyIndex();
 
-                pid_t childID = pid;
+            // If there is an empty spot
+            if(index != -1) {
+                pid_t pid = fork();
 
-                childProcess.process_id = childID;
-                childProcess.programName = programName;
+                //  ** ERROR **
+                if(pid < 0) {
+                    printf("Error on forking\n");
+                }
 
-                // Find next empty index
-                int index;
-                index = findNextEmptyIndex();
+                // **PARENT PROCESS**
 
-                if(index != -1) {
+                else if(pid > 0) {
+                    struct process childProcess;
+
+                    pid_t childID = pid;
+
+                    childProcess.process_id = childID;
+                    childProcess.programName = programName;
+
+                    // ** ENTER PROCESS INTO TABLE **
                     processTable[index] = &childProcess;
-                } else {
-                    printf("Too many process running");
+
+                    //If we are not running in the background and we are the parent
+                    if(!bg) {
+                        // Wait till our current child process is done
+                        int status;
+                        waitpid(pid, &status,  0);
+                    }
                 }
 
-                //If we are not running in the background and we are the parent
-                if(!bg) {
+                // **CHILD PROCESS**
 
-                    // Wait till our current child process is done
-                    int status;
-                    waitpid(pid, &status,  0);
+                else {
+                    // Stop the loop in the child so we don't have infinite children asking for command #plannedparenthood
+                    stopLoop = 0;
+                    pthread_t thread1;
+                    // if we want to run process in background and we are the child
+                    if(bg) {
+                        struct process currentProcess;
 
+                        void* processPointer = &currentProcess;
 
-                    printf("This is the parent\n");
-                    printf("Process ID: %d\n", getpid());
+                        // Create a thread that will do the actions for us
+                        pthread_create(&thread1, NULL, runProcess, programName);
+
+                        printf("Starting Thread\n");
+                        pthread_join(thread1, NULL);
+                        printf("Thread Done\n");
+                    } else {
+                        // Run the process normally
+                        runProcess((void*) programName);
+                    }
 
                 }
-            }  //if it is 0, we are the child
-            else {
-                pthread_t thread1;
-                // if we want to run process in background and we are the child
-                if(bg) {
-                    struct process currentProcess;
-
-                    void* processPointer = &currentProcess;
-
-                    // Create a thread that will do the actions for us
-                    pthread_create(&thread1, NULL, runProcess, processPointer);
-
-                    printf("Starting Thread\n");
-                    pthread_join(thread1, NULL);
-                    printf("Thread Done\n");
-                } else {
-                    // Run the process normally
-                    runProcess((void*) processTable);
-                }
-
+            } else {
+                printf("Too many processes running\n");
             }
-            // We now check  if bg = 1, if it is, use a pthread to fork the process, otherwise just call the method normally
-            // Passing reference to process table so we modify the right thing
 
 
-
-
-            printf("Finished\n");
 		}
-	//}
-
-
-    /*
-     *
-     * void* getCommand(char* input)
-{
-	printf("Type command you would like to execute:\n ");
-    fgets(input,20,stdin);
-
-}
-void* showJobs(struct Commands cmdArray[]) {
-    printf("Here are the jobs being run:\n");
-    //Check if array is empty, if not cycle through array and print out necessary information
-}
-
-struct processTableEntry createStruct(char* input) {
-    struct processTableEntry processTable[5];
-
-    char *token;
-    token = strtok(input, " ");
-    while(token != NULL) {
-
-        if(strcmp(token, "&") == 0) {
-            // Background process logic
-            // We might need to move this outside of this method, we probably don't want to have the threads be created in here
-        } else {
-            strcpy(cmdTemp.programName, token);
-        }
-        printf("token is %s\n", token, input);
-        token = strtok(NULL, " ");
-    }
-
-    return cmdTemp;
-}
-
-void* executeProgram(struct Commands cmd) {
-    pid_t pid=fork();
-    if (pid==0) {
-        execv(cmd.programName,NULL);
-        exit(127);
-    }
-    else {
-        waitpid(pid,0,0);
-    }
-}
-*/
+	}
+	printf("We are child ending now\n");
 }
