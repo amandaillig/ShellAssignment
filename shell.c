@@ -27,7 +27,7 @@ void* runProcess(void * programName) {
     char* fileName = (char*)programName;
 
     // Replace process with execve system call
-   // execve("helloworld", NULL, NULL);
+    execve("helloworld", NULL, NULL);
 
     printf("CHILD\n");
 }
@@ -46,8 +46,8 @@ int main(int argc, char * argv[])
 {
 	//while(1) {
 
-		char* input;
-		char* jobsCommand = "jobs";
+		char *input[20];
+		char *jobsCommand = "jobs";
 
 		// read Input
 		//getCommand(input);
@@ -63,8 +63,9 @@ int main(int argc, char * argv[])
             // Tokenize String so we know if there is an & or not
             char *token;
             int bg = 0;
-            char *programName;
-            token = strtok(input, " ");
+            char *programName[20];
+
+            token = strtok(token, " ");
             while(token != NULL) {
                 if(strcmp(token, "&\n") == 0) {
                     bg = 1;
@@ -73,6 +74,8 @@ int main(int argc, char * argv[])
                 }
                 token = strtok(NULL, " ");
             }
+	    
+	    printf("%s\n", input);
             //Fork and get process ID
             pid_t pid = fork();
 
