@@ -27,7 +27,7 @@ void* runProcess(void * programName) {
     char* fileName = (char*)programName;
 
     // Replace process with execve system call
-    execve("helloworld", NULL, NULL);
+   // execve("helloworld", NULL, NULL);
 
     printf("CHILD\n");
 }
@@ -46,7 +46,7 @@ int main(int argc, char * argv[])
 {
 	//while(1) {
 
-		const char* input[20];
+		char* input;
 		char* jobsCommand = "jobs";
 
 		// read Input
@@ -90,17 +90,12 @@ int main(int argc, char * argv[])
                 // Find next empty index
                 int index;
                 index = findNextEmptyIndex();
-                printf(index);
 
                 if(index != -1) {
                     processTable[index] = &childProcess;
                 } else {
                     printf("Too many process running");
                 }
-
-                index = findNextEmptyIndex();
-
-                printf("%d\n", index);
 
                 //If we are not running in the background and we are the parent
                 if(!bg) {
