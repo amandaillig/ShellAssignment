@@ -42,7 +42,7 @@ int findNextEmptyIndex() {
 
 int main(int argc, char * argv[])
 {
-	while(1) {
+	//while(1) {
 
 		const char* input[20];
 		char* jobsCommand = "jobs";
@@ -78,10 +78,12 @@ int main(int argc, char * argv[])
             //If id is not 0, we are the parent
             else if(pid > 0) {
                 struct process childProcess;
+
                 pid_t childID = pid;
 
                 childProcess.process_id = childID;
                 childProcess.programName = programName;
+
 
                 // Find next empty index
                 int index;
@@ -94,8 +96,7 @@ int main(int argc, char * argv[])
                     printf("Too many process running");
                 }
 
-                // Enter process into processTable
-                processTable[0] = &childProcess;
+                printf("%d\n", index);
 
                 //If we are not running in the background and we are the parent
                 if(!bg) {
@@ -138,7 +139,7 @@ int main(int argc, char * argv[])
 
             printf("Finished\n");
 		}
-	}
+	//}
 
 
     /*
