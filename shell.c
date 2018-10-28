@@ -20,12 +20,14 @@ void* getCommand(char* input)
 	printf("Type command you would like to execute:\n ");
     fgets(input,20,stdin);
 
-
 }
 
 void* runProcess(void * programName) {
 
     char* fileName = (char*)programName;
+
+    // Replace process with execve system call
+    execve("helloworld", NULL, NULL);
 
     printf("CHILD\n");
 }
@@ -34,10 +36,10 @@ int findNextEmptyIndex() {
     for(int i = 0; i < PROCESS_TABLE_SIZE; i++) {
         if(processTable[i] == NULL) {
             return i;
-        } else {
-            return -1;
         }
     }
+
+    return -1;
 }
 
 int main(int argc, char * argv[])
@@ -95,6 +97,8 @@ int main(int argc, char * argv[])
                 } else {
                     printf("Too many process running");
                 }
+
+                index = findNextEmptyIndex();
 
                 printf("%d\n", index);
 
