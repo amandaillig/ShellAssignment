@@ -8,13 +8,12 @@
 
 #define PROCESS_TABLE_SIZE 5
 
-struct process {
+typedef struct process {
     char * programName;
     int process_id;
-    int parent_id;
 };
 
-struct process processTable[PROCESS_TABLE_SIZE];
+struct process* processTable[PROCESS_TABLE_SIZE] = {0};
 
 void* getCommand(char* input)
 {
@@ -28,24 +27,28 @@ void* runProcess(void * programName) {
 
     char* fileName = (char*)programName;
 
-    pid_t processID = getpid();
-    pid_t parentID = getppid();
+    printf("CHILD\n");
+}
 
-    printf("This is the child\n");
-    printf("Process ID: %d\n", processID);
-    printf("Finished printing id\n");
+int findNextEmptyIndex() {
+    for(int i = 0; i < PROCESS_TABLE_SIZE; i++) {
+        if(processTable[i] == NULL) {
+            return i;
+        } else {
+            return -1;
+        }
+    }
 }
 
 int main(int argc, char * argv[])
 {
-	//while(1)
-	//
+	while(1) {
+
 		const char* input[20];
 		char* jobsCommand = "jobs";
 
 		// read Input
 		getCommand(input);
-		printf("%s\n", input); //Debugging
 
 		//If User typed in 'jobs', show job table
 		if(strcmp(input, jobsCommand) == 0) {
@@ -63,7 +66,6 @@ int main(int argc, char * argv[])
                 } else {
                     strcpy(programName, token);
                 }
-                printf("token is %s\n", token, input);
                 token = strtok(NULL, " ");
             }
             //Fork and get process ID
@@ -81,8 +83,19 @@ int main(int argc, char * argv[])
                 childProcess.process_id = childID;
                 childProcess.programName = programName;
 
+                // Find next empty index
+                int index;
+                index = findNextEmptyIndex();
+                printf(index);
+
+                if(index != -1) {
+                    processTable[index] = &childProcess;
+                } else {
+                    printf("Too many process running");
+                }
+
                 // Enter process into processTable
-                processTable[0] = childProcess;
+                processTable[0] = &childProcess;
 
                 //If we are not running in the background and we are the parent
                 if(!bg) {
@@ -94,7 +107,7 @@ int main(int argc, char * argv[])
 
                     printf("This is the parent\n");
                     printf("Process ID: %d\n", getpid());
-                    printf("%d\n, %s\n", processTable[0].process_id, processTable[0].programName);
+
                 }
             }  //if it is 0, we are the child
             else {
@@ -123,9 +136,9 @@ int main(int argc, char * argv[])
 
 
 
-            printf("Finished");
+            printf("Finished\n");
 		}
-	//}
+	}
 
 
     /*
