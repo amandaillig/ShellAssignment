@@ -50,7 +50,10 @@ int main(int argc, char * argv[])
 		char* jobsCommand = "jobs";
 
 		// read Input
-		getCommand(input);
+		//getCommand(input);
+
+        printf("Type command you would like to execute:\n");
+        fgets(input,20,stdin);
 
 		//If User typed in 'jobs', show job table
 		if(strcmp(input, jobsCommand) == 0) {
