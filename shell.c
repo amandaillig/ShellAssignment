@@ -46,7 +46,7 @@ int main(int argc, char * argv[])
 
         // ** QUIT COMMAND **
 
-        if((strcmp(input, "quit") == 0) || strcmp(input, "q")) {
+        if((strcmp(input, "quit\n") == 0) || (strcmp(input, "q\n") == 0)) {
             stopLoop = 0;
         }
 		// ** SHOW JOBS **
@@ -139,9 +139,6 @@ int main(int argc, char * argv[])
             } else {
                 printf("Too many processes running\n");
             }
-
-
 		}
 	}
-	printf("We are child ending now\n");
 }
