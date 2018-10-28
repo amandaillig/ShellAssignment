@@ -18,6 +18,9 @@ struct process* processTable[PROCESS_TABLE_SIZE] = {0};
 void* runProcess(void * programName) {
     char* fileName = (char*) programName;
 
+    // Remove that darn newline char
+    fileName[strlen(fileName) - 1] = '\0';
+
     // Replace process with execve system call
     if(execve(fileName, NULL, NULL) == -1) {
         printf("There was an error processing your request.  Wrong file name?\n");
@@ -74,8 +77,6 @@ int main(int argc, char * argv[])
                     bg = 1;
                 } else {
                     strcpy(programName, token);
-                    // Remove that darn newline char
-                    programName[strlen(programName) - 1] = '\0';
                 }
                 token = strtok(NULL, " ");
             }
