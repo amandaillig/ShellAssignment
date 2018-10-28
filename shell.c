@@ -15,21 +15,16 @@ typedef struct process {
 
 struct process* processTable[PROCESS_TABLE_SIZE] = {0};
 
-void* getCommand(char* input)
-{
-	printf("Type command you would like to execute:\n ");
-    fgets(input,20,stdin);
 
-}
 
 void* runProcess(void * programName) {
 
     char* fileName = (char*)programName;
 
     // Replace process with execve system call
-    execve("helloworld", NULL, NULL);
-
-    printf("CHILD\n");
+    if(execve(fileName, NULL, NULL) == -1) {
+        printf("There was an error processing your request");
+    }
 }
 
 int findNextEmptyIndex() {
@@ -38,7 +33,6 @@ int findNextEmptyIndex() {
             return i;
         }
     }
-
     return -1;
 }
 
@@ -49,9 +43,7 @@ int main(int argc, char * argv[])
 		char *input[20];
 		char *jobsCommand = "jobs";
 
-		// read Input
-		//getCommand(input);
-
+		// Read Input
         printf("Type command you would like to execute:\n");
         fgets(input,20,stdin);
 
@@ -74,8 +66,7 @@ int main(int argc, char * argv[])
                 }
                 token = strtok(NULL, " ");
             }
-	    
-	    printf("%s\n", input);
+
             //Fork and get process ID
             pid_t pid = fork();
 
@@ -91,7 +82,6 @@ int main(int argc, char * argv[])
 
                 childProcess.process_id = childID;
                 childProcess.programName = programName;
-
 
                 // Find next empty index
                 int index;
@@ -148,6 +138,13 @@ int main(int argc, char * argv[])
 
 
     /*
+     *
+     * void* getCommand(char* input)
+{
+	printf("Type command you would like to execute:\n ");
+    fgets(input,20,stdin);
+
+}
 void* showJobs(struct Commands cmdArray[]) {
     printf("Here are the jobs being run:\n");
     //Check if array is empty, if not cycle through array and print out necessary information
