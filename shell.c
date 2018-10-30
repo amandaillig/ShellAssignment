@@ -76,12 +76,15 @@ void startFork(int bg, char * programName, int * stopLoop, int index) {
         // ** ENTER PROCESS INTO TABLE **
         processTable[index] = &childProcess;
 
+        int status;
+        pid_t returnPid;
+
         //If we are not running in the background and we are the parent
         if(bg) {
-            return;
+            returnPid = waitpid(pid, &status,  WNOHANG);
+            // Check if child process has ended
         } else {
             // Wait till our current child process is done
-            int status;
             waitpid(pid, &status,  0);
         }
     }
@@ -92,10 +95,9 @@ void startFork(int bg, char * programName, int * stopLoop, int index) {
         pthread_t thread1;
         // if we want to run process in background and we are the child
         if(bg) {
-            // Create a thread that will do the actions for us
-            pthread_create(&thread1, NULL, runProcess, (void*)programName);
+            // I THINK this is where the pthreads should go
+            // Run pthread on runprocess() with a parameter of (void*)programName
 
-            pthread_join(thread1, NULL);
 
         } else {
             // Run the process normally
