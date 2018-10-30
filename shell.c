@@ -21,6 +21,7 @@ void* runProcess(void * programName) {
     // Replace process with execve system call
     if(execve(fileName, NULL, NULL) == -1) {
         printf("There was an error processing your request.  Wrong file name?\n");
+        printf("File name: %s.", fileName);
     }
 }
 
@@ -34,7 +35,7 @@ int findNextEmptyIndex() {
 }
 
 void getCommand(char * input) {
-    printf("Type command you would like to execute:\n");
+    printf("\nType command you would like to execute:\n");
     fgets(input,20,stdin);
 }
 
