@@ -7,13 +7,10 @@
 #include <pthread.h>
 
 #define PROCESS_TABLE_SIZE 5
-int stopLoop;
 
 typedef struct process {
     char * programName;
-    int * process_id;
-    int * index;
-    int * bg;
+    int process_id;
 };
 
 struct process* processTable[PROCESS_TABLE_SIZE] = {0};
@@ -23,8 +20,6 @@ void* runProcess(void * programName) {
 
     // Remove that darn newline char
     fileName[strlen(fileName) - 1] = '\0';
-
-    printf("CHILD FILENAME: %s\n", fileName);
 
     // Replace process with execve system call
     if(execve(fileName, NULL, NULL) == -1) {
@@ -60,11 +55,7 @@ void tokenizeString(char * input, char * programName, int * bg) {
     }
 }
 
-void * startFork(void * childProc) {
-    struct process *childProcess = (struct process*)childProc;
-    int bg;
-    bg = *childProcess -> bg;
-
+void startFork(int bg, char * programName, int * stopLoop, int index) {
     pid_t pid = fork();
 
     //  ** ERROR **
@@ -73,14 +64,19 @@ void * startFork(void * childProc) {
     }
         // **PARENT PROCESS**
     else if(pid > 0) {
+        struct process childProcess;
+
         pid_t childID = pid;
 
-        *childProcess -> process_id = &childID;
+        childProcess.process_id = childID;
+        childProcess.programName = programName;
 
         // ** ENTER PROCESS INTO TABLE **
-        processTable[*childProcess -> index] = childProcess;
+        processTable[index] = &childProcess;
 
+        //If we are not running in the background and we are the parent
         if(!bg) {
+            // Wait till our current child process is done
             int status;
             waitpid(pid, &status,  0);
         }
@@ -88,30 +84,33 @@ void * startFork(void * childProc) {
         // **CHILD PROCESS**
     else {
         // Stop the loop in the child so we don't have infinite children asking for command #plannedparenthood
-        stopLoop = 0;
+        *stopLoop = 0;
+        pthread_t thread1;
+        // if we want to run process in background and we are the child
         if(bg) {
-            pthread_t thread1;
             // Create a thread that will do the actions for us
-            pthread_create(&thread1, NULL, runProcess, (void*)childProcess->programName);
+            pthread_create(&thread1, NULL, runProcess, (void*)programName);
 
             printf("Starting Thread\n");
             pthread_join(thread1, NULL);
             printf("Thread Done\n");
-        } else{
-            runProcess((void*) childProcess->programName);
+        } else {
+            // Run the process normally
+            runProcess((void*) programName);
         }
+
     }
 }
 
 int main(int argc, char * argv[])
 {
-    stopLoop = 1;
-	while(stopLoop) {
+    int stopLoop = 1;
+    while(stopLoop) {
 
-		char *input[20];
-		char *jobsCommand = "jobs\n";
+        char *input[20];
+        char *jobsCommand = "jobs\n";
 
-		// ** READ USER INPUT **
+        // ** READ USER INPUT **
         getCommand(&input);
 
         printf(input);
@@ -120,13 +119,13 @@ int main(int argc, char * argv[])
             stopLoop = 0;
         }
 
-		// ** SHOW JOBS **
-		else if(strcmp(input, jobsCommand) == 0) {
+            // ** SHOW JOBS **
+        else if(strcmp(input, jobsCommand) == 0) {
             //showJobs(processTable);
             printf("Show Jobbios\n");
-		}
-		// ** START EXECUTING COMMAND **
-		else {
+        }
+            // ** START EXECUTING COMMAND **
+        else {
 
             // ** TOKENIZING STRING **
             int bg = 0;
@@ -141,17 +140,10 @@ int main(int argc, char * argv[])
 
             // If there is an empty spot
             if(index != -1) {
-                struct process *childProcess;
-
-                *childProcess -> programName = programName;
-                *childProcess -> index = &index;
-                *childProcess -> bg = bg;
-
-                startFork((void*)&childProcess);
-
+                startFork(bg, &programName, &stopLoop, index);
             } else {
                 printf("Too many processes running\n");
             }
-		}
-	}
+        }
+    }
 }
