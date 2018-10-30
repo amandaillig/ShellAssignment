@@ -52,7 +52,7 @@ void tokenizeString(char * input, char * programName, int * bg) {
     }
 
     if(bg) {
-        strcpy(programName, programName[strlen(programName) - 1] = '\0');
+        programName[strlen(programName) - 1] = '\0';
     }
 }
 
