@@ -13,6 +13,7 @@ typedef struct process {
     char * programName;
     int * process_id;
     int * index;
+    int * bg;
 };
 
 struct process* processTable[PROCESS_TABLE_SIZE] = {0};
@@ -22,6 +23,8 @@ void* runProcess(void * programName) {
 
     // Remove that darn newline char
     fileName[strlen(fileName) - 1] = '\0';
+
+    printf("CHILD FILENAME: %s\n", fileName);
 
     // Replace process with execve system call
     if(execve(fileName, NULL, NULL) == -1) {
@@ -59,6 +62,8 @@ void tokenizeString(char * input, char * programName, int * bg) {
 
 void * startFork(void * childProc) {
     struct process *childProcess = (struct process*)childProc;
+    int bg;
+    bg = *childProcess.bg;
 
     pid_t pid = fork();
 
@@ -75,16 +80,26 @@ void * startFork(void * childProc) {
         // ** ENTER PROCESS INTO TABLE **
         processTable[*childProcess.index] = childProcess;
 
-        int status;
-        //waitpid(pid, &status,  0);
+        if(!bg) {
+            int status;
+            waitpid(pid, &status,  0);
+        }
     }
         // **CHILD PROCESS**
     else {
         // Stop the loop in the child so we don't have infinite children asking for command #plannedparenthood
         stopLoop = 0;
+        if(bg) {
+            pthread_t thread1;
+            // Create a thread that will do the actions for us
+            pthread_create(&thread1, NULL, runProcess, (void*)childProcess->programName);
 
-        runProcess((void*) childProcess->programName);
-
+            printf("Starting Thread\n");
+            pthread_join(thread1, NULL);
+            printf("Thread Done\n");
+        } else{
+            runProcess((void*) childProcess->programName);
+        }
     }
 }
 
@@ -130,20 +145,10 @@ int main(int argc, char * argv[])
 
                 *childProcess.programName = programName;
                 *childProcess.index = &index;
+                *childProcess.bg = bg;
 
+                startFork((void*)&childProcess);
 
-
-                if(bg) {
-                    pthread_t thread1;
-                    // Create a thread that will do the actions for us
-                    pthread_create(&thread1, NULL, startFork, (void*)childProcess);
-
-                    printf("Starting Thread\n");
-                    pthread_join(thread1, NULL);
-                    printf("Thread Done\n");
-                } else {
-                    startFork((void*)&childProcess);
-                }
             } else {
                 printf("Too many processes running\n");
             }
