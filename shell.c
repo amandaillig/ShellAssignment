@@ -84,7 +84,7 @@ void startFork(int bg, char * programName, int * stopLoop, int index) {
         // **CHILD PROCESS**
     else {
         // Stop the loop in the child so we don't have infinite children asking for command #plannedparenthood
-        stopLoop = 0;
+        *stopLoop = 0;
         pthread_t thread1;
         // if we want to run process in background and we are the child
         if(bg) {
