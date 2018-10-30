@@ -57,7 +57,9 @@ void tokenizeString(char * input, char * programName, int * bg) {
     }
 }
 
-void * startFork(struct process * childProcess) {
+void * startFork(void * childProc) {
+    struct process *childProcess = (struct process*)childProc;
+
     pid_t pid = fork();
 
     //  ** ERROR **
@@ -66,10 +68,9 @@ void * startFork(struct process * childProcess) {
     }
         // **PARENT PROCESS**
     else if(pid > 0) {
-        struct process childProcess;
         pid_t childID = pid;
 
-        *childProcess.process_id = &childID;
+        childProcess.process_id = &childID;
 
         int status;
         waitpid(pid, &status,  0);
@@ -139,7 +140,7 @@ int main(int argc, char * argv[])
                     pthread_join(thread1, NULL);
                     printf("Thread Done\n");
                 } else {
-                    startFork(&childProcess);
+                    startFork((void*)&childProcess);
                 }
             } else {
                 printf("Too many processes running\n");
