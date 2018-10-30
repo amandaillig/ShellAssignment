@@ -63,7 +63,7 @@ void tokenizeString(char * input, char * programName, int * bg) {
 void * startFork(void * childProc) {
     struct process *childProcess = (struct process*)childProc;
     int bg;
-    bg = *childProcess.bg;
+    bg = *childProcess -> bg;
 
     pid_t pid = fork();
 
@@ -75,10 +75,10 @@ void * startFork(void * childProc) {
     else if(pid > 0) {
         pid_t childID = pid;
 
-        *childProcess.process_id = &childID;
+        *childProcess -> process_id = &childID;
 
         // ** ENTER PROCESS INTO TABLE **
-        processTable[*childProcess.index] = childProcess;
+        processTable[*childProcess -> index] = childProcess;
 
         if(!bg) {
             int status;
@@ -143,9 +143,9 @@ int main(int argc, char * argv[])
             if(index != -1) {
                 struct process *childProcess;
 
-                *childProcess.programName = programName;
-                *childProcess.index = &index;
-                *childProcess.bg = bg;
+                *childProcess -> programName = programName;
+                *childProcess -> index = &index;
+                *childProcess -> bg = bg;
 
                 startFork((void*)&childProcess);
 
