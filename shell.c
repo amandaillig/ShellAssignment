@@ -12,7 +12,7 @@ int stopLoop;
 typedef struct process {
     char * programName;
     int * process_id;
-    int index;
+    int * index;
 };
 
 struct process* processTable[PROCESS_TABLE_SIZE] = {0};
@@ -70,10 +70,13 @@ void * startFork(void * childProc) {
     else if(pid > 0) {
         pid_t childID = pid;
 
-        childProcess.process_id = &childID;
+        *childProcess.process_id = &childID;
+
+        // ** ENTER PROCESS INTO TABLE **
+        processTable[*childProcess.index] = childProcess;
 
         int status;
-        waitpid(pid, &status,  0);
+        //waitpid(pid, &status,  0);
     }
         // **CHILD PROCESS**
     else {
@@ -125,11 +128,10 @@ int main(int argc, char * argv[])
             if(index != -1) {
                 struct process *childProcess;
 
-                childProcess.programName = programName;
-                childProcess.index = index;
+                *childProcess.programName = programName;
+                *childProcess.index = &index;
 
-                // ** ENTER PROCESS INTO TABLE **
-                processTable[index] = childProcess;
+
 
                 if(bg) {
                     pthread_t thread1;
