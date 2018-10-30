@@ -123,18 +123,18 @@ int main(int argc, char * argv[])
 
             // If there is an empty spot
             if(index != -1) {
-                struct process childProcess;
+                struct process *childProcess;
 
                 childProcess.programName = programName;
                 childProcess.index = index;
 
                 // ** ENTER PROCESS INTO TABLE **
-                processTable[index] = &childProcess;
+                processTable[index] = childProcess;
 
                 if(bg) {
                     pthread_t thread1;
                     // Create a thread that will do the actions for us
-                    pthread_create(&thread1, NULL, startFork, (void*)&childProcess);
+                    pthread_create(&thread1, NULL, startFork, (void*)childProcess);
 
                     printf("Starting Thread\n");
                     pthread_join(thread1, NULL);
