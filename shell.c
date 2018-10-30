@@ -57,6 +57,15 @@ void tokenizeString(char * input, char * programName, int * bg) {
     }
 }
 
+void showJobs() {
+    for(int i = 0; i < PROCESS_TABLE_SIZE; i++) {
+        if(processTable[i] != NULL) {
+            printf("pid: %d, name: %s\n", processTable[i]->process_id, processTable[i]->programName);
+        }
+
+    }
+}
+
 void startFork(int bg, char * programName, int * stopLoop, int index) {
     pid_t pid = fork();
 
@@ -95,9 +104,10 @@ void startFork(int bg, char * programName, int * stopLoop, int index) {
         pthread_t thread1;
         // if we want to run process in background and we are the child
         if(bg) {
-            // I THINK this is where the pthreads should go
-            // Run pthread on runprocess() with a parameter of (void*)programName
+            // Create a thread that will do the actions for us
+            pthread_create(&thread1, NULL, runProcess, (void*)programName);
 
+            pthread_join(thread1, NULL);
 
         } else {
             // Run the process normally
@@ -125,8 +135,7 @@ int main(int argc, char * argv[])
 
             // ** SHOW JOBS **
         else if(strcmp(input, jobsCommand) == 0) {
-            //showJobs(processTable);
-            printf("Show Jobbios\n");
+            showJobs();
         }
             // ** START EXECUTING COMMAND **
         else {
