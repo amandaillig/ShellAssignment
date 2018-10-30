@@ -75,11 +75,11 @@ void startFork(int bg, char * programName, int * stopLoop, int index) {
         processTable[index] = &childProcess;
 
         //If we are not running in the background and we are the parent
-        if(!bg) {
+        //if(!bg) {
             // Wait till our current child process is done
             int status;
             waitpid(pid, &status,  0);
-        }
+        //}
     }
         // **CHILD PROCESS**
     else {
