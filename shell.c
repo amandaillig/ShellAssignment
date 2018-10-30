@@ -52,7 +52,7 @@ void tokenizeString(char * input, char * programName, int * bg) {
         token = strtok(NULL, " ");
     }
 
-    if(!bg) {
+    if(!(*bg)) {
         programName[strlen(programName) - 1] = '\0';
     }
 }
@@ -77,11 +77,13 @@ void startFork(int bg, char * programName, int * stopLoop, int index) {
         processTable[index] = &childProcess;
 
         //If we are not running in the background and we are the parent
-        //if(!bg) {
+        if(bg) {
+            return;
+        } else {
             // Wait till our current child process is done
             int status;
             waitpid(pid, &status,  0);
-        //}
+        }
     }
         // **CHILD PROCESS**
     else {
