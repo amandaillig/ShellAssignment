@@ -47,7 +47,7 @@ void tokenizeString(char * input, char * programName, int * bg) {
     token = strtok(input, " ");
     while(token != NULL) {
         if(strcmp(token, "&\n") == 0) {
-            bg = 1;
+            *bg = 1;
         } else {
             strcpy(programName, token);
         }
