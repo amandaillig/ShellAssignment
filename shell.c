@@ -95,9 +95,8 @@ void startFork(int bg, char * programName, int * stopLoop, int index) {
             // Create a thread that will do the actions for us
             pthread_create(&thread1, NULL, runProcess, (void*)programName);
 
-            printf("Starting Thread\n");
             pthread_join(thread1, NULL);
-            printf("Thread Done\n");
+
         } else {
             // Run the process normally
             runProcess((void*) programName);
@@ -117,7 +116,6 @@ int main(int argc, char * argv[])
         // ** READ USER INPUT **
         getCommand(&input);
 
-        printf(input);
         // ** QUIT COMMAND **
         if((strcmp(input, "quit\n") == 0) || (strcmp(input, "q\n") == 0)) {
             stopLoop = 0;
@@ -130,7 +128,6 @@ int main(int argc, char * argv[])
         }
             // ** START EXECUTING COMMAND **
         else {
-
             // ** TOKENIZING STRING **
             int bg = 0;
             char *programName[20];
