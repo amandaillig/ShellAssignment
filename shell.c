@@ -6,6 +6,13 @@
 #include <sys/wait.h> /* for wait */
 #include <pthread.h>
 
+/*
+ * Intro To Operating Systems
+ * Assignment 2: Shell
+ *
+ * Authors: Matthew Muenzberg, Mandy Illig, Maxwell Hicks
+ */
+
 #define PROCESS_TABLE_SIZE 5
 
 struct process {
@@ -15,8 +22,6 @@ struct process {
 };
 
 struct process processTable[PROCESS_TABLE_SIZE];
-
-
 
 void* runProcess(void * programName) {
     char* fileName = (char*) programName;
@@ -52,7 +57,7 @@ void cleanUpProcessTable() {
 }
 
 void getCommand(char input[20]) {
-    printf("\nType command you would like to execute:\n");
+    printf("\nbw: ");
     fgets(input,20,stdin);
 }
 
@@ -136,6 +141,8 @@ void startFork(int bg, char * programName, int * stopLoop, int index) {
 
 int main(int argc, char * argv[])
 {
+    printf("Shellinator v9000\n");
+    printf("Authors: Matthew Muenzberg, Mandy Illig, Maxwell Hicks");
     int stopLoop = 1;
     while(stopLoop) {
 
