@@ -8,10 +8,12 @@
 
 #define PROCESS_TABLE_SIZE 5
 
-typedef struct process {
+struct process {
     char * programName;
     int process_id;
 };
+
+
 
 struct process* processTable[PROCESS_TABLE_SIZE] = {0};
 
@@ -72,7 +74,7 @@ void tokenizeString(char * input, char * programName, int * bg) {
 }
 
 void showJobs() {
-    cleanUpProcessTable();
+    //cleanUpProcessTable();
     printf("PID\tProgram\n");
     for(int i = 0; i < PROCESS_TABLE_SIZE; i++) {
         if(processTable[i] != NULL) {
@@ -112,7 +114,6 @@ void startFork(int bg, char * programName, int * stopLoop, int index) {
         // ** ENTER PROCESS INTO TABLE **
         processTable[index] = &childProcess;
         int status;
-        pid_t return_pid;
 
         //If we are not running in the background and we are the parent
         if(bg) {
@@ -147,7 +148,7 @@ int main(int argc, char * argv[])
     int stopLoop = 1;
     while(stopLoop) {
 
-        cleanUpProcessTable();
+        //cleanUpProcessTable();
 
         char *input[20];
         char *jobsCommand = "jobs\n";
