@@ -9,13 +9,14 @@
 #define PROCESS_TABLE_SIZE 5
 
 struct process {
-    char * programName;
+    char programName[20];
     int process_id;
+    int active;
 };
 
+struct process processTable[PROCESS_TABLE_SIZE];
 
 
-struct process* processTable[PROCESS_TABLE_SIZE] = {0};
 
 void* runProcess(void * programName) {
     char* fileName = (char*) programName;
@@ -29,7 +30,7 @@ void* runProcess(void * programName) {
 
 int findNextEmptyIndex() {
     for(int i = 0; i < PROCESS_TABLE_SIZE; i++) {
-        if(processTable[i] == NULL) {
+        if(!processTable[i].active) {
             return i;
         }
     }
@@ -38,13 +39,13 @@ int findNextEmptyIndex() {
 
 void cleanUpProcessTable() {
     for (int i = 0; i < PROCESS_TABLE_SIZE; i++) {
-        if (processTable[i] != NULL) {
+        if (processTable[i].active) {
             int status;
-            pid_t pid = processTable[i]->process_id;
+            pid_t pid = processTable[i].process_id;
             waitpid(pid, &status, WNOHANG);
 
             if (WIFEXITED(status)) {
-                processTable[i] = NULL;
+                processTable[i].active = 0;
             }
         }
     }
@@ -77,29 +78,16 @@ void showJobs() {
     //cleanUpProcessTable();
     printf("PID\tProgram\n");
     for(int i = 0; i < PROCESS_TABLE_SIZE; i++) {
-        if(processTable[i] != NULL) {
-            struct process p = *processTable[i];
+        if(processTable[i].active) {
+            struct process p = processTable[i];
             printf("%d\t%s\n", p.process_id, p.programName);
         }
     }
 }
 
 
-
-int findProcessInTable(pid_t pid) {
-    for(int i = 0; i < PROCESS_TABLE_SIZE; i++) {
-        if(processTable[i] != NULL) {
-            if(processTable[i]->process_id == pid) {
-                return i;
-            }
-        }
-    }
-}
-
 void startFork(int bg, char * programName, int * stopLoop, int index) {
     pid_t pid = fork();
-
-    printf("Program Name when forking: %s", programName);
 
     //  ** ERROR **
     if(pid < 0) {
@@ -107,12 +95,15 @@ void startFork(int bg, char * programName, int * stopLoop, int index) {
     }
         // **PARENT PROCESS**
     else if(pid > 0) {
-        struct process childProcess =  { programName, pid };
+        struct process childProcess;
 
-        pid_t childID = pid;
+        childProcess.process_id = pid;
+        strcpy(childProcess.programName, programName);
+        childProcess.active = 1;
+
 
         // ** ENTER PROCESS INTO TABLE **
-        processTable[index] = &childProcess;
+        processTable[index] = childProcess;
         int status;
 
         //If we are not running in the background and we are the parent
@@ -169,7 +160,7 @@ int main(int argc, char * argv[])
             // ** TOKENIZING STRING **
             int bg = 0;
             char *programName[20];
-            tokenizeString(&input, &programName, &bg);
+            tokenizeString(&input, programName, &bg);
 
             // ** FORKING **
 
@@ -180,8 +171,7 @@ int main(int argc, char * argv[])
 
             // If there is an empty spot
             if(index != -1) {
-                printf("Program Name: %s", programName);
-                startFork(bg, &programName, &stopLoop, index);
+                startFork(bg, programName, &stopLoop, index);
             } else {
                 printf("Too many processes running\n");
             }
