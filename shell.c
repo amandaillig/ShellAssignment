@@ -96,6 +96,8 @@ int findProcessInTable(pid_t pid) {
 void startFork(int bg, char * programName, int * stopLoop, int index) {
     pid_t pid = fork();
 
+    printf("Program Name when forking: %s", programName);
+
     //  ** ERROR **
     if(pid < 0) {
         printf("Error on forking\n");
@@ -179,6 +181,7 @@ int main(int argc, char * argv[])
 
             // If there is an empty spot
             if(index != -1) {
+                printf("Program Name: %s", programName);
                 startFork(bg, &programName, &stopLoop, index);
             } else {
                 printf("Too many processes running\n");
