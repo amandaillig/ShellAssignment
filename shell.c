@@ -51,7 +51,7 @@ void cleanUpProcessTable() {
     }
 }
 
-void getCommand(char * input) {
+void getCommand(char input[20]) {
     printf("\nType command you would like to execute:\n");
     fgets(input,20,stdin);
 }
@@ -75,7 +75,7 @@ void tokenizeString(char * input, char * programName, int * bg) {
 }
 
 void showJobs() {
-    //cleanUpProcessTable();
+    cleanUpProcessTable();
     printf("PID\tProgram\n");
     for(int i = 0; i < PROCESS_TABLE_SIZE; i++) {
         if(processTable[i].active) {
@@ -139,13 +139,13 @@ int main(int argc, char * argv[])
     int stopLoop = 1;
     while(stopLoop) {
 
-        //cleanUpProcessTable();
+        cleanUpProcessTable();
 
-        char *input[20];
+        char input[20];
         char *jobsCommand = "jobs\n";
 
         // ** READ USER INPUT **
-        getCommand(&input);
+        getCommand(input);
 
         // ** QUIT COMMAND **
         if((strcmp(input, "quit\n") == 0) || (strcmp(input, "q\n") == 0)) {
@@ -160,10 +160,9 @@ int main(int argc, char * argv[])
             // ** TOKENIZING STRING **
             int bg = 0;
             char *programName[20];
-            tokenizeString(&input, programName, &bg);
+            tokenizeString(input, programName, &bg);
 
             // ** FORKING **
-
 
             // Check if our process table is already full
             int index;
