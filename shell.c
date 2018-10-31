@@ -34,6 +34,20 @@ int findNextEmptyIndex() {
     return -1;
 }
 
+void cleanUpProcessTable() {
+    for (int i = 0; i < PROCESS_TABLE_SIZE; i++) {
+        if (processTable[i] != NULL) {
+            int status;
+            pid_t pid = processTable[i]->process_id;
+            waitpid(pid, &status, WNOHANG);
+
+            if (WIFEXITED(status)) {
+                processTable[i] = NULL;
+            }
+        }
+    }
+}
+
 void getCommand(char * input) {
     printf("\nType command you would like to execute:\n");
     fgets(input,20,stdin);
@@ -58,11 +72,24 @@ void tokenizeString(char * input, char * programName, int * bg) {
 }
 
 void showJobs() {
+
     for(int i = 0; i < PROCESS_TABLE_SIZE; i++) {
+        int status;
         if(processTable[i] != NULL) {
             printf("pid: %d, name: %s\n", processTable[i]->process_id, processTable[i]->programName);
         }
+    }
+}
 
+
+
+int findProcessInTable(pid_t pid) {
+    for(int i = 0; i < PROCESS_TABLE_SIZE; i++) {
+        if(processTable[i] != NULL) {
+            if(processTable[i]->process_id == pid) {
+                return i;
+            }
+        }
     }
 }
 
@@ -83,14 +110,13 @@ void startFork(int bg, char * programName, int * stopLoop, int index) {
         childProcess.programName = programName;
 
         // ** ENTER PROCESS INTO TABLE **
-        processTable[index] = * childProcess;
-
+        processTable[index] = &childProcess;
         int status;
-        pid_t returnPid;
+        pid_t return_pid;
 
         //If we are not running in the background and we are the parent
         if(bg) {
-            returnPid = waitpid(pid, &status,  WNOHANG);
+            waitpid(pid, &status,  WNOHANG);
             // Check if child process has ended
         } else {
             // Wait till our current child process is done
@@ -113,7 +139,6 @@ void startFork(int bg, char * programName, int * stopLoop, int index) {
             // Run the process normally
             runProcess((void*) programName);
         }
-
     }
 }
 
@@ -121,6 +146,8 @@ int main(int argc, char * argv[])
 {
     int stopLoop = 1;
     while(stopLoop) {
+
+        cleanUpProcessTable();
 
         char *input[20];
         char *jobsCommand = "jobs\n";
@@ -132,7 +159,6 @@ int main(int argc, char * argv[])
         if((strcmp(input, "quit\n") == 0) || (strcmp(input, "q\n") == 0)) {
             stopLoop = 0;
         }
-
             // ** SHOW JOBS **
         else if(strcmp(input, jobsCommand) == 0) {
             showJobs();
@@ -145,6 +171,7 @@ int main(int argc, char * argv[])
             tokenizeString(&input, &programName, &bg);
 
             // ** FORKING **
+
 
             // Check if our process table is already full
             int index;
