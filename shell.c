@@ -81,11 +81,11 @@ void tokenizeString(char * input, char * programName, int * bg) {
 
 void showJobs() {
     cleanUpProcessTable();
-    printf("PID\tProgram\n");
+    printf("PID\t\tProgram\n");
     for(int i = 0; i < PROCESS_TABLE_SIZE; i++) {
         if(processTable[i].active) {
             struct process p = processTable[i];
-            printf("%d\t%s\n", p.process_id, p.programName);
+            printf("%d\t\t%s\n", p.process_id, p.programName);
         }
     }
 }
