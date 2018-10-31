@@ -29,7 +29,7 @@ void* runProcess(void * programName) {
     // Replace process with execve system call
     if(execve(fileName, NULL, NULL) == -1) {
         printf("There was an error processing your request.  Wrong file name?\n");
-        printf("File name: %s.\n", fileName);
+
     }
 }
 
@@ -142,7 +142,8 @@ void startFork(int bg, char * programName, int * stopLoop, int index) {
 int main(int argc, char * argv[])
 {
     printf("Shellinator v9000\n");
-    printf("Authors: Matthew Muenzberg, Mandy Illig, Maxwell Hicks");
+    printf("Authors: Matthew Muenzberg, Mandy Illig, Maxwell Hicks\n");
+    printf("Type 'jobs' to see a list of jobs, type 'q' or 'quit' to exit shell");
     int stopLoop = 1;
     while(stopLoop) {
 
