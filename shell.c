@@ -21,7 +21,7 @@ void* runProcess(void * programName) {
     // Replace process with execve system call
     if(execve(fileName, NULL, NULL) == -1) {
         printf("There was an error processing your request.  Wrong file name?\n");
-        printf("File name: %s.", fileName);
+        printf("File name: %s.\n", fileName);
     }
 }
 
@@ -83,7 +83,7 @@ void startFork(int bg, char * programName, int * stopLoop, int index) {
         childProcess.programName = programName;
 
         // ** ENTER PROCESS INTO TABLE **
-        processTable[index] = &childProcess;
+        processTable[index] = * childProcess;
 
         int status;
         pid_t returnPid;
