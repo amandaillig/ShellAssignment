@@ -72,11 +72,12 @@ void tokenizeString(char * input, char * programName, int * bg) {
 }
 
 void showJobs() {
-
+    cleanUpProcessTable();
+    printf("PID\tProgram\n");
     for(int i = 0; i < PROCESS_TABLE_SIZE; i++) {
-        int status;
         if(processTable[i] != NULL) {
-            printf("pid: %d, name: %s\n", processTable[i]->process_id, processTable[i]->programName);
+            struct process p = *processTable[i];
+            printf("%d\t%s\n", p.process_id, p.programName);
         }
     }
 }
@@ -104,12 +105,9 @@ void startFork(int bg, char * programName, int * stopLoop, int index) {
     }
         // **PARENT PROCESS**
     else if(pid > 0) {
-        struct process childProcess;
+        struct process childProcess =  { programName, pid };
 
         pid_t childID = pid;
-
-        childProcess.process_id = childID;
-        childProcess.programName = programName;
 
         // ** ENTER PROCESS INTO TABLE **
         processTable[index] = &childProcess;
