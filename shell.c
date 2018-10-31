@@ -101,13 +101,13 @@ void startFork(int bg, char * programName, int * stopLoop, int index) {
         strcpy(childProcess.programName, programName);
         childProcess.active = 1;
 
-
-        // ** ENTER PROCESS INTO TABLE **
-        processTable[index] = childProcess;
         int status;
 
         //If we are not running in the background and we are the parent
         if(bg) {
+            // ** ENTER PROCESS INTO TABLE **
+            processTable[index] = childProcess;
+
             waitpid(pid, &status,  WNOHANG);
             // Check if child process has ended
         } else {
@@ -153,6 +153,7 @@ int main(int argc, char * argv[])
         }
             // ** SHOW JOBS **
         else if(strcmp(input, jobsCommand) == 0) {
+
             showJobs();
         }
             // ** START EXECUTING COMMAND **
